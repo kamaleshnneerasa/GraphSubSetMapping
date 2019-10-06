@@ -125,6 +125,18 @@ vector<string> oneOne(int n, int m){
 			}
 		}
 	}
+	for(int i=1;i<=m;i++){
+		vector<string> temp;
+		for(int j=0;j<n;j++){
+			str = to_string(j*m+i);
+			temp.push_back(str);
+		}
+		for(int i1=0;i1<n;i1++){
+			for(int j1=i1+1;j1<n;j1++){
+				res.push_back("-"+temp[i1]+" -"+temp[j1]);
+			}
+		}
+	}
 	return res;
 }
 
