@@ -27,14 +27,16 @@ int main(){
 			inFile >> dst;
 			if(src>0 && dst>0){
 				if(firstGraph == true){
-					srcList1.push_back(src-1);   //Assuming that nodes start at 0 and not 1
-					dstList1.push_back(dst-1);
+					srcList1.push_back(src);   //Assuming that nodes start at 0 and not 1
+					dstList1.push_back(dst);
+					cout<<src<<" "<<dst<<"\n";
 					if(numVertices1<src) numVertices1 = src;
 					if(numVertices1<dst) numVertices1 = dst;
 				}
 				else{
-					srcList2.push_back(src-1);
-					dstList2.push_back(dst-1);
+					srcList2.push_back(src);
+					dstList2.push_back(dst);
+					cout<<src<<" "<<dst<<"\n";
 					if(numVertices2<src) numVertices2 = src;
 					if(numVertices2<dst) numVertices2 = dst;
 				}
@@ -46,15 +48,19 @@ int main(){
 	Graph gPhone(numVertices1);
 	Graph gEmail(numVertices2);
 	int size = srcList1.size();
+	cout<<"Phone Starts here "<<srcList1.size()<<"\n";
 	for(int i=0;i<size;i++){
+		cout<<srcList1[i]-1 <<" "<<dstList1[i]-1<<"\n";
 		gPhone.addEdge(srcList1[i]-1,dstList1[i]-1);
 	}
 	size = srcList2.size();
-	for(int i=0;i<size;i++){
+	cout<<"Email starts here "<<dstList2.size()<<"\n";
+	for(int i=0;i<size-1;i++){
+		cout<<srcList2[i]-1 <<" "<<dstList2[i]-1<<"\n";
 		gEmail.addEdge(srcList2[i]-1,dstList2[i]-1);
 	}
 
-	vector<int> l = gPhone.neighbours(0);
+	/*vector<int> l = gPhone.neighbours(0);
 	size = l.size();
 	for (int i=0; i<size; i++){
 		cout << l[i]+1<< endl;
@@ -76,23 +82,26 @@ int main(){
 	size = l.size();
 	for (int i=0; i<size; i++){
 		cout << l[i]+1<<endl;
-	}
+	}*/
 	//Assumption Xij = i*m+j; number of vars = n*m; number of constrs = n*(Mc2+1);
+	cout<<"Hey1\n";
 	vector<string> res1 = oneOne(numVertices2,numVertices1);
+	for(int i=0;i<res1.size();i++) cout<<res1[i]<<"\n";
+	cout<<"Hey2\n";
 	vector<string> res2 = edgeConstraint(gEmail,gPhone);
+	cout<<"Hey3";
     for(int i=0;i<res2.size();i++){
     	res1.push_back(res2[i]);
     }
-
+    cout<<"Hey4";
     int numVariables = numVertices2*numVertices1;
     int numConstraints = res1.size();
 
-    ofstream outFile("test.satinput");
+    ofstream outFile("../test.satinput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
     for(int i=0;i<res1.size();i++){
     	outFile<<res1[i]<<" 0\n";
     }
-
 }
 
 //
@@ -109,9 +118,9 @@ vector<string> oneOne(int n, int m){
 		}
 		res.push_back(constr.substr(0,constr.length()-1));
 		//These constraints are for ensuring no more than one constraint is true
-		for(int i=0;i<m;i++){
-			for(int j=i+1;j<m;j++){
-				res.push_back("-"+temp[i]+" -"+temp[j]);
+		for(int i1=0;i1<m;i1++){
+			for(int j1=i1+1;j1<m;j1++){
+				res.push_back("-"+temp[i1]+" -"+temp[j1]);
 			}
 		}
 	}
@@ -123,6 +132,9 @@ vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 	int n = gEmail.numVertices; int m = gPhone.numVertices; 
 	vector<pair<int,int>> eList = gEmail.edgeList();
 	vector<pair<int,int>> pList = gPhone.edgeList();
+	cout<<eList.size()<<"----------------------\n";
+	for(int i=0;i<eList.size();i++) cout<<eList[i].first<<" "<<eList[i].second<<" \n";
+	cout<<pList.size()<<"----------------------\n";
 	for(int i=0;i<eList.size();i++){
 		int v1 = eList[i].first; int v2 = eList[i].second;
 		vector<pair<int,int>> temp;
@@ -132,23 +144,28 @@ vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 			andClause.first = v1*m+(v1Dash+1);  //We are assuming that the graph has nodes from 0 to numVertices-1.So we have to add a +1
 			andClause.second = v2*m+(v2Dash+1);
 			temp.push_back(andClause);
+			//cout<<v1<<" "<<v1Dash<<"\n";
 		}
 		vector<string> res1;
 		if(temp.size()>0) res1 = getCnf(temp);
-		for(int i=0;i<res1.size();i++){
-			res.push_back(res1[i]);
+		cout<<"Value of i"<<i<<" size of clauses"<<res1.size();
+		for(int k=0;k<res1.size();k++){
+			//cout<<"k "<<k<<"\n";
+			res.push_back(res1[k]);
 		}
 	}
 	return res;
 }
 
 vector<string> getCnf(vector<pair<int,int>> clause){
+	cout<<"getCnf "<<clause.size()<<"\n";
 	vector<string> res;
 	if(clause.size()==1){
 		pair<int,int> p = clause[0];
 		string s1 = to_string(p.first);
 		string s2 = to_string(p.second);
 		res.push_back(s1); res.push_back(s2);
+		cout<<"output\n";
 		return res;
 	}
 	pair<int,int> p = clause[clause.size()-1];
@@ -157,8 +174,10 @@ vector<string> getCnf(vector<pair<int,int>> clause){
 	clause.pop_back();
 	vector<string> temp = getCnf(clause);
 	for(int i=0;i<temp.size();i++){
+		//cout<<temp[i]+" "+s1<<"\n";
 		res.push_back(temp[i]+" "+s1);
 		res.push_back(temp[i]+" "+s2);
 	}
+	cout<<"outCnf "<<clause.size()<<"\n";
 	return res;
 }
