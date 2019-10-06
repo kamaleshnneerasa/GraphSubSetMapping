@@ -35,6 +35,17 @@ public:
 	vector<int> neighbours(int src){
 		return adjList[src];
 	}
+	vector<pair<int,int>> edgeList(){
+		vector<pair<int,int>> res;
+		for(int i=0;i<numVertices;i++){
+			for(int j=0;j<adjList[i].size();j++){
+				pair<int,int> p;
+				p.first = i; p.second = adjList[i][j];
+				res.push_back(p);
+			}
+		}
+		return res;
+	}
 };
 
 #endif
