@@ -158,6 +158,7 @@ vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 	return res;
 }
 
+//This uses the principle of duality
 vector<string> edgeConstraint1(Graph gEmail,Graph gPhone){
 	vector<string> res;
 	int n = gEmail.numVertices; int m = gPhone.numVertices; 
@@ -168,14 +169,20 @@ vector<string> edgeConstraint1(Graph gEmail,Graph gPhone){
 	cout<<pList.size()<<"----------------------\n";
 	for(int i=0;i<eList.size();i++){
 		int v1 = eList[i].first; int v2 = eList[i].second;
-		vector<pair<int,int>> temp;
 		for(int j=0;j<pList.size();j++){
 			int v1Dash = pList[j].first; int v2Dash = pList[j].second;
-			pair<int,int> andClause;
 			int x1 = v1*m+(v1Dash+1);  //We are assuming that the graph has nodes from 0 to numVertices-1.So we have to add a +1
-			int x2 = v2*m+(v2Dash+1);
+			int x2 = v2*m+(v2Dash+1);  //v1 is mapped to V1Dash and v2 is mapped to v2Dash
 			res.push_back("-"+to_string(x1)+" -"+to_string(x2));
-			//cout<<v1<<" "<<v1Dash<<"\n";
+		}
+	}
+	for(int i=0;i<pList.size();i++){
+		int v1 = pList[i].first; int v2 = pList[i].second;
+		for(int j=0;j<eList.size();j++){
+			int v1Dash = eList[j].first; int v2Dash = eList[j].second;
+			int x1 = v1Dash*m+(v1+1);  //We are assuming that the graph has nodes from 0 to numVertices-1.So we have to add a +1
+			int x2 = v2Dash*m+(v2+1);  //v1Dash is mapped to v1 and v2Dash is mapped to v2
+			res.push_back("-"+to_string(x1)+" -"+to_string(x2));
 		}
 	}
 	return res;
