@@ -22,14 +22,14 @@ int main(){
 			inFile >> dst;
 			if(src>0 && dst>0){
 				if(firstGraph == true){
-					srcList1.push_back(src);
-					dstList1.push_back(dst);
+					srcList1.push_back(src-1);   //Assuming that nodes start at 0 and not 1
+					dstList1.push_back(dst-1);
 					if(numVertices1<src) numVertices1 = src;
 					if(numVertices1<dst) numVertices1 = dst;
 				}
 				else{
-					srcList2.push_back(src);
-					dstList2.push_back(dst);
+					srcList2.push_back(src-1);
+					dstList2.push_back(dst-1);
 					if(numVertices2<src) numVertices2 = src;
 					if(numVertices2<dst) numVertices2 = dst;
 				}
@@ -73,7 +73,21 @@ int main(){
 		cout << l[i]+1<<endl;
 	}
 	//Assumption Xij = i*m+j; number of vars = n*m; number of constrs = n*(Mc2+1);
-	vector<string> res = oneOne(numVertices2,numVertices1);
+	vector<string> res1 = oneOne(numVertices2,numVertices1);
+	vector<string> res2 = edgeConstraint(gEmail,gPhone);
+    for(int i=0;i<res2;i++){
+    	res1.push_back(res2[i]);
+    }
+
+    int numVariables = gEmail.size()*gPhone.size();
+    int numConstraints = res1.size();
+
+    ofstream outFile("test.satinput");
+    outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
+    for(int i=0;i<res1.size();i++){
+    	outFile<<res[i]<<" 0\n";
+    }
+
 }
 
 //
@@ -99,10 +113,47 @@ vector<string> oneOne(int n, int m){
 	return res;
 }
 
-vector<string> edgeConstraint(Graph gEmail,Graph gPhone,int offset){
-	int currVal = offset;
+vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
+	vector<string> res;
+	int n = gEmail.size();int m = gPhone.size(); 
 	vector<vector<int>> eList = gEmail.edgeList;
 	vector<vector<int>> pList = gPhone.edgeList;
-	
+	for(int i=0;i<eList.size();i++){
+		int v1 = eList[i].first; int v2 = eList[i].second;
+		vector<pair<int,int>> temp;
+		for(int j=0;j<pList.size();j++){
+			int v1Dash = pList[j].first; int v2Dash = pList[j].second;
+			pair<int,int> andClause;
+			andClause.first = v1*m+(v1Dash+1);  //We are assuming that the graph has nodes from 0 to numVertices-1.So we have to add a +1
+			andClause.second = v2*m+(v2Dash+1);
+			temp.push_back(andClause);
+		}
+		vector<string> res1;
+		if(temp.size()>0) res1 = getCnf(temp);
+		for(int i=0;i<res1.size();i++){
+			res.push_back(res1[i]);
+		}
+	}
+	return res;
 }
 
+vector<string> getCnf(vector<pair<int,int>> clause){
+	vector<string> res;
+	if(clause.size()==1){
+		pair<int,int> p = clause[0];
+		string s1 = to_string(p.first);
+		string s2 = to_string(p.second);
+		res.push_back(s1); res.push_back(s2);
+		return res;
+	}
+	pair<int,int> p = clause[clause.size()-1];
+	string s1 = to_string(p.first);
+	string s2 = to_string(p.second);
+	clause.pop_back();
+	vector<string> temp = getCnf(clause);
+	for(int i=0;i<temp.size();i++){
+		res.push_back(temp[i]+" "+s1);
+		res.push_back(temp[i]+" "+s2);
+	}
+	return res;
+}
