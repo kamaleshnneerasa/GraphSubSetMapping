@@ -72,4 +72,28 @@ int main(){
 	for (int i=0; i<size; i++){
 		cout << l[i]+1<<endl;
 	}
+	//Assumption Xij = i*m+j; number of vars = n*m; number of constrs = n*(Mc2+1);
+	vector<string> res = oneOne(numVertices2,numVertices1);
+}
+
+//
+vector<string> oneOne(int n, int m){
+	string str,constr;
+	vector<string> res;
+	for(int i=0;i<n;i++){
+		vector<string> temp;
+		constr = "";
+		for(int j=1;j<=m;j++){
+			str = to_string(i*m+j);
+			temp.push_back(str);
+			constr = constr+str+" ";
+		}
+		res.push_back(constr.substr(0,constr.length()-1));
+		for(int i=0;i<m;i++){
+			for(int j=i+1;j<m;j++){
+				res.push_back("-"+temp[i]+" -"+temp[j]);
+			}
+		}
+	}
+	return res;
 }
