@@ -82,13 +82,14 @@ vector<string> oneOne(int n, int m){
 	vector<string> res;
 	for(int i=0;i<n;i++){
 		vector<string> temp;
-		constr = "";
+		constr = "";  //This constraint tells that atleast one value must be true
 		for(int j=1;j<=m;j++){
 			str = to_string(i*m+j);
 			temp.push_back(str);
 			constr = constr+str+" ";
 		}
 		res.push_back(constr.substr(0,constr.length()-1));
+		//These constraints are for ensuring no more than one constraint is true
 		for(int i=0;i<m;i++){
 			for(int j=i+1;j<m;j++){
 				res.push_back("-"+temp[i]+" -"+temp[j]);
@@ -97,3 +98,11 @@ vector<string> oneOne(int n, int m){
 	}
 	return res;
 }
+
+vector<string> edgeConstraint(Graph gEmail,Graph gPhone,int offset){
+	int currVal = offset;
+	vector<vector<int>> eList = gEmail.edgeList;
+	vector<vector<int>> pList = gPhone.edgeList;
+	
+}
+
