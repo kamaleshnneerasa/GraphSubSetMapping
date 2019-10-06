@@ -6,6 +6,11 @@
 #include "graph.h"
 
 using namespace std;
+
+vector<string> getCnf(vector<pair<int,int>>);
+vector<string> oneOne(int,int);
+vector<string> edgeConstraint(Graph,Graph);
+
 int main(){
 	string line;
 	int numVertices1 = 0,numVertices2=0; bool firstGraph = true;
@@ -75,17 +80,17 @@ int main(){
 	//Assumption Xij = i*m+j; number of vars = n*m; number of constrs = n*(Mc2+1);
 	vector<string> res1 = oneOne(numVertices2,numVertices1);
 	vector<string> res2 = edgeConstraint(gEmail,gPhone);
-    for(int i=0;i<res2;i++){
+    for(int i=0;i<res2.size();i++){
     	res1.push_back(res2[i]);
     }
 
-    int numVariables = gEmail.size()*gPhone.size();
+    int numVariables = numVertices2*numVertices1;
     int numConstraints = res1.size();
 
     ofstream outFile("test.satinput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
     for(int i=0;i<res1.size();i++){
-    	outFile<<res[i]<<" 0\n";
+    	outFile<<res1[i]<<" 0\n";
     }
 
 }
@@ -115,9 +120,9 @@ vector<string> oneOne(int n, int m){
 
 vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 	vector<string> res;
-	int n = gEmail.size();int m = gPhone.size(); 
-	vector<vector<int>> eList = gEmail.edgeList;
-	vector<vector<int>> pList = gPhone.edgeList;
+	int n = gEmail.numVertices; int m = gPhone.numVertices; 
+	vector<pair<int,int>> eList = gEmail.edgeList();
+	vector<pair<int,int>> pList = gPhone.edgeList();
 	for(int i=0;i<eList.size();i++){
 		int v1 = eList[i].first; int v2 = eList[i].second;
 		vector<pair<int,int>> temp;
