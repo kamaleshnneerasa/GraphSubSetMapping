@@ -44,7 +44,30 @@ int main(){
 	for(int i=0;i<srcList2.size();i++){
 		gEmail.addEdge(srcList2[i],dstList2[i]);
 	}
-	
+	//Assumption Xij = (i*m+j); Range of vars = (1-n*m); Number of Constraints = n*(Mc2+1)
+	vector<String> res1 = oneOne(numVertices2,numVertices1);
+}
+
+//n-> Domain Size  m -> Codomain Size
+vector<string> oneOne(int n, int m){
+	string str,constr;
+	vector<string> res;
+	for(int i=0;i<n;i++){
+		vector<string> temp;
+		constr = "";
+		for(int j=1;j<=m;j++){
+			str = to_string(i*m+j);
+			temp.push_back(str);
+			constr = constr+str+" ";
+		}
+		res.push_back(constr.substr(0,constr.length()-1));
+		for(int i=0;i<m;i++){
+			for(int j=i+1;j<m;j++){
+				res.push_back("-"+temp[i]+" -"+temp[j]);
+			}
+		}
+	}
+	return res;
 }
 
 /*
