@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <ctime>
 
 #include "graph.h"
 
@@ -14,12 +15,14 @@ vector<string> edgeConstraint(Graph,Graph);
 vector<string> edgeConstraint1(Graph,Graph);
 
 int main(){
-	string line;
+	time_t start = time(0);
+	 // string line;
 	int numVertices1 = 0,numVertices2=0; bool firstGraph = true;
 	vector<int> srcList1,srcList2,dstList1,dstList2;  //(srcList1,dstList1)----> gPhone;(srcList2,srcList2)---> gEmail
 	ifstream inFile("input.txt");
 	if(inFile.is_open()){
-		int src,dst,temp;
+		int src,dst,temp, prev_src, prev_dst;
+		prev_src = -1; prev_dst = -1;
 		while(!inFile.eof()){
 			// temp = s.find(" ");              //s.find(c) Finds the index of first occurance of c
 			// src = stoi(line.substring(0,temp));    //s.substring(startInd,len) Finds substring of s starting at startInd and Length = len
@@ -27,37 +30,44 @@ int main(){
 			// //Checking for the end of first graph in the if-condition
 			inFile >> src;
 			inFile >> dst;
-			if(src>0 && dst>0){
-				if(firstGraph == true){
-					srcList1.push_back(src);   //Assuming that nodes start at 0 and not 1
-					dstList1.push_back(dst);
-					cout<<src<<" "<<dst<<"\n";
-					if(numVertices1<src) numVertices1 = src;
-					if(numVertices1<dst) numVertices1 = dst;
+			if (prev_src == src && prev_dst == dst){
+
+			}else{
+				if(src>0 && dst>0){
+					if(firstGraph == true){
+						srcList1.push_back(src);   //Assuming that nodes start at 0 and not 1
+						dstList1.push_back(dst);
+						cout<<src<<" "<<dst<<"\n";
+						if(numVertices1<src) numVertices1 = src;
+						if(numVertices1<dst) numVertices1 = dst;
+					}
+					else{
+						srcList2.push_back(src);
+						dstList2.push_back(dst);
+						cout<<src<<" "<<dst<<"\n";
+						if(numVertices2<src) numVertices2 = src;
+						if(numVertices2<dst) numVertices2 = dst;
+					}
 				}
-				else{
-					srcList2.push_back(src);
-					dstList2.push_back(dst);
-					cout<<src<<" "<<dst<<"\n";
-					if(numVertices2<src) numVertices2 = src;
-					if(numVertices2<dst) numVertices2 = dst;
-				}
-			}
-			else firstGraph = false;
+				else firstGraph = false;
 		}
+		prev_src = src;
+		prev_dst = dst;
+	}
+	inFile.close();
 	}
 	else cout<<"Unable to open the file";
 	Graph gPhone(numVertices1);
 	Graph gEmail(numVertices2);
 	int size = srcList1.size();
-	cout<<"Phone Starts here "<<srcList1.size()<<"\n";
+	// cout<<"Phone Starts here "<<srcList1.size()<<"\n";
 	for(int i=0;i<size;i++){
-		cout<<srcList1[i]-1 <<" "<<dstList1[i]-1<<"\n";
+		// cout<<srcList1[i]-1 <<" "<<dstList1[i]-1<<"\n";
 		gPhone.addEdge(srcList1[i]-1,dstList1[i]-1);
 	}
 	size = srcList2.size();
-	cout<<"Email starts here "<<dstList2.size()<<"\n";
-	for(int i=0;i<size-1;i++){
+	// cout<<"Email starts here "<<dstList2.size()<<"\n";
+	for(int i=0;i<size;i++){
 		cout<<srcList2[i]-1 <<" "<<dstList2[i]-1<<"\n";
 		gEmail.addEdge(srcList2[i]-1,dstList2[i]-1);
 	}
@@ -86,13 +96,17 @@ int main(){
 		cout << l[i]+1<<endl;
 	}*/
 	//Assumption Xij = i*m+j; number of vars = n*m; number of constrs = n*(Mc2+1);
-	cout<<"Hey1\n";
+	// cout<<"Hey1\n";
 	vector<string> res1 = oneOne(numVertices2,numVertices1);
-	for(int i=0;i<res1.size();i++) cout<<res1[i]<<"\n";
-	cout<<"Hey2\n";
+	// for(int i=0;i<res1.size();i++) cout<<res1[i]<<"\n";
+	// cout<<"Hey2\n";
 	vector<string> res2 = myConstraint(gEmail,gPhone);
   int numVariables = (numVertices2*numVertices1)+(numVertices1*numVertices1)+(numVertices2*numVertices2);
   int numConstraints = res1.size() + res2.size();
+
+	ofstream outFile1("./values.txt");
+	outFile1 << numVertices2 << " " << numVertices1 << "\n";
+	outFile1.close();
 
     ofstream outFile("./../test.satinput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
@@ -102,6 +116,11 @@ int main(){
 		for (int i=0; i<res2.size(); i++){
 			outFile<<res2[i]<<" 0\n";
 		}
+
+		outFile.close();
+
+		time_t finish = time(0);
+		cout << finish - start << " seconds" << endl;
 }
 
 //
@@ -143,45 +162,45 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone){
 	vector<string> res;
 	int n = gEmail.numVertices; int m = gPhone.numVertices;
 	for (int i = 0; i < n; i++){
-		vector<int> temp = gEmail.neighbours(i);
-		int temp1 = 0; int size = temp.size();
-		cout << size << "\n";
-		int nxtNeighbour = -1;
-		if (temp1 < size){
-			nxtNeighbour = temp[temp1];
-		}
+		// vector<int> temp = gEmail.neighbours(i);
+		// int temp1 = 0; int size = temp.size();
+		// cout << size << "\n";
+		// int nxtNeighbour = -1;
+		// if (temp1 < size){
+		// 	nxtNeighbour = temp[temp1];
+		// }
 		for (int j=0; j<n; j++){
-			if (j != nxtNeighbour){
+			if (!gEmail.isEdge(i,j)){
 				res.push_back(to_string(-((n*m)+(i*n)+j+1)));
 			}else{
 				res.push_back(to_string((n*m)+(i*n)+j+1));
-				temp1++;
-				if (temp1 < size){
-					nxtNeighbour = temp[temp1];
-				}
+				// temp1++;
+				// if (temp1 < size){
+				// 	nxtNeighbour = temp[temp1];
+				// }
 			}
 		}
 	}
 	for (int i = 0; i < m; i++){
-		vector<int> temp = gPhone.neighbours(i);
-		int temp1 = 0; int size = temp.size();
-		int nxtNeighbour = -1;
-		if (temp1 < size){
-			nxtNeighbour = temp[temp1];
-		}
+		// vector<int> temp = gPhone.neighbours(i);
+		// int temp1 = 0; int size = temp.size();
+		// int nxtNeighbour = -1;
+		// if (temp1 < size){
+		// 	nxtNeighbour = temp[temp1];
+		// }
 		for (int j=0; j<m; j++){
-			if (j != nxtNeighbour){
+			if (!gPhone.isEdge(i,j)){
 				res.push_back(to_string(-((n*n)+(n*m)+(i*m)+j+1)));
 			}else{
 				res.push_back(to_string((n*n)+(n*m)+(i*m)+j+1));
-				temp1++;
-				if (temp1 < size){
-					nxtNeighbour = temp[temp1];
-				}
+				// temp1++;
+				// if (temp1 < size){
+				// 	nxtNeighbour = temp[temp1];
+				// }
 			}
 		}
 	}
-	cout << "done\n";
+	// cout << "done\n";
 
 	for (int i=0; i<n; i++){
 		for (int j=0; j<n; j++){
