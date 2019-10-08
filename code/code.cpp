@@ -9,6 +9,7 @@ using namespace std;
 
 vector<string> getCnf(vector<pair<int,int>>);
 vector<string> oneOne(int,int);
+vector<string> myConstraint(Graph, Graph);
 vector<string> edgeConstraint(Graph,Graph);
 vector<string> edgeConstraint1(Graph,Graph);
 
@@ -89,20 +90,18 @@ int main(){
 	vector<string> res1 = oneOne(numVertices2,numVertices1);
 	for(int i=0;i<res1.size();i++) cout<<res1[i]<<"\n";
 	cout<<"Hey2\n";
-	vector<string> res2 = edgeConstraint1(gEmail,gPhone);
-	cout<<"Hey3";
-    for(int i=0;i<res2.size();i++){
-    	res1.push_back(res2[i]);
-    }
-    cout<<"Hey4";
-    int numVariables = numVertices2*numVertices1;
-    int numConstraints = res1.size();
+	vector<string> res2 = myConstraint(gEmail,gPhone);
+  int numVariables = (numVertices2*numVertices1)+(numVertices1*numVertices1)+(numVertices2*numVertices2);
+  int numConstraints = res1.size() + res2.size();
 
-    ofstream outFile("../test.satinput");
+    ofstream outFile("./../test.satinput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
     for(int i=0;i<res1.size();i++){
     	outFile<<res1[i]<<" 0\n";
     }
+		for (int i=0; i<res2.size(); i++){
+			outFile<<res2[i]<<" 0\n";
+		}
 }
 
 //
@@ -140,9 +139,66 @@ vector<string> oneOne(int n, int m){
 	return res;
 }
 
+vector<string> myConstraint(Graph gEmail, Graph gPhone){
+	vector<string> res;
+	int n = gEmail.numVertices; int m = gPhone.numVertices;
+	for (int i = 0; i < n; i++){
+		vector<int> temp = gEmail.neighbours(i);
+		int temp1 = 0; int size = temp.size();
+		cout << size << "\n";
+		int nxtNeighbour = -1;
+		if (temp1 < size){
+			nxtNeighbour = temp[temp1];
+		}
+		for (int j=0; j<n; j++){
+			if (j != nxtNeighbour){
+				res.push_back(to_string(-((n*m)+(i*n)+j+1)));
+			}else{
+				res.push_back(to_string((n*m)+(i*n)+j+1));
+				temp1++;
+				if (temp1 < size){
+					nxtNeighbour = temp[temp1];
+				}
+			}
+		}
+	}
+	for (int i = 0; i < m; i++){
+		vector<int> temp = gPhone.neighbours(i);
+		int temp1 = 0; int size = temp.size();
+		int nxtNeighbour = -1;
+		if (temp1 < size){
+			nxtNeighbour = temp[temp1];
+		}
+		for (int j=0; j<m; j++){
+			if (j != nxtNeighbour){
+				res.push_back(to_string(-((n*n)+(n*m)+(i*m)+j+1)));
+			}else{
+				res.push_back(to_string((n*n)+(n*m)+(i*m)+j+1));
+				temp1++;
+				if (temp1 < size){
+					nxtNeighbour = temp[temp1];
+				}
+			}
+		}
+	}
+	cout << "done\n";
+
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			for (int iDash=0; iDash<m; iDash++){
+				for (int jDash=0; jDash<m; jDash++){
+					res.push_back(to_string(-((n*m)+(i*n)+j+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
+					res.push_back(to_string(-((n*n)+(n*m)+(iDash*m)+jDash+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
+				}
+			}
+		}
+	}
+	return res;
+}
+
 vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 	vector<string> res;
-	int n = gEmail.numVertices; int m = gPhone.numVertices; 
+	int n = gEmail.numVertices; int m = gPhone.numVertices;
 	vector<pair<int,int>> eList = gEmail.edgeList();
 	vector<pair<int,int>> pList = gPhone.edgeList();
 	cout<<eList.size()<<"----------------------\n";
@@ -173,7 +229,7 @@ vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 //This uses the principle of duality
 vector<string> edgeConstraint1(Graph gEmail,Graph gPhone){
 	vector<string> res;
-	int n = gEmail.numVertices; int m = gPhone.numVertices; 
+	int n = gEmail.numVertices; int m = gPhone.numVertices;
 	vector<pair<int,int>> eList = gEmail.edgeList();
 	vector<pair<int,int>> pList = gPhone.edgeList();
 	cout<<eList.size()<<"----------------------\n";
