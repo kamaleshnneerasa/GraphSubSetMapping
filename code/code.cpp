@@ -8,18 +8,20 @@
 
 using namespace std;
 
-vector<string> getCnf(vector<pair<int,int>>);
+vector<string> getCnf(vector<pair<int,int> >);
 vector<string> oneOne(int,int);
-vector<string> myConstraint(Graph, Graph);
+vector<string> myConstraint(Graph, Graph, bool**, bool**);
 vector<string> edgeConstraint(Graph,Graph);
 vector<string> edgeConstraint1(Graph,Graph);
 
-int main(){
+int main(int argc, char** argv){
 	time_t start = time(0);
 	 // string line;
 	int numVertices1 = 0,numVertices2=0; bool firstGraph = true;
 	vector<int> srcList1,srcList2,dstList1,dstList2;  //(srcList1,dstList1)----> gPhone;(srcList2,srcList2)---> gEmail
-	ifstream inFile("input.txt");
+	string input_file;
+	input_file = argv[1];
+	ifstream inFile(input_file+".graphs");
 	if(inFile.is_open()){
 		int src,dst,temp, prev_src, prev_dst;
 		prev_src = -1; prev_dst = -1;
@@ -37,14 +39,14 @@ int main(){
 					if(firstGraph == true){
 						srcList1.push_back(src);   //Assuming that nodes start at 0 and not 1
 						dstList1.push_back(dst);
-						cout<<src<<" "<<dst<<"\n";
+						// cout<<src<<" "<<dst<<"\n";
 						if(numVertices1<src) numVertices1 = src;
 						if(numVertices1<dst) numVertices1 = dst;
 					}
 					else{
 						srcList2.push_back(src);
 						dstList2.push_back(dst);
-						cout<<src<<" "<<dst<<"\n";
+						// cout<<src<<" "<<dst<<"\n";
 						if(numVertices2<src) numVertices2 = src;
 						if(numVertices2<dst) numVertices2 = dst;
 					}
@@ -57,20 +59,41 @@ int main(){
 	inFile.close();
 	}
 	else cout<<"Unable to open the file";
+	bool** arr1;
+	arr1 = new bool*[numVertices1];
+	for (int i=0; i<numVertices1; i++){
+		arr1[i] = new bool[numVertices1];
+		for (int j=0; j<numVertices1; j++){
+			arr1[i][j] = false;
+		}
+	}
+
+	bool** arr2;
+	arr2 = new bool*[numVertices2];
+	for (int i=0; i<numVertices2; i++){
+		arr2[i] = new bool[numVertices2];
+		for (int j=0; j<numVertices2; j++){
+			arr2[i][j] = false;
+		}
+	}
+
 	Graph gPhone(numVertices1);
 	Graph gEmail(numVertices2);
 	int size = srcList1.size();
 	// cout<<"Phone Starts here "<<srcList1.size()<<"\n";
 	for(int i=0;i<size;i++){
 		// cout<<srcList1[i]-1 <<" "<<dstList1[i]-1<<"\n";
-		gPhone.addEdge(srcList1[i]-1,dstList1[i]-1);
+		// gPhone.addEdge(srcList1[i]-1,dstList1[i]-1);
+		arr1[srcList1[i]-1][dstList1[i]-1] = true;
 	}
 	size = srcList2.size();
 	// cout<<"Email starts here "<<dstList2.size()<<"\n";
 	for(int i=0;i<size;i++){
-		cout<<srcList2[i]-1 <<" "<<dstList2[i]-1<<"\n";
-		gEmail.addEdge(srcList2[i]-1,dstList2[i]-1);
+		// cout<<srcList2[i]-1 <<" "<<dstList2[i]-1<<"\n";
+		// gEmail.addEdge(srcList2[i]-1,dstList2[i]-1);
+		arr2[srcList2[i]-1][dstList2[i]-1] = true;
 	}
+
 
 	/*vector<int> l = gPhone.neighbours(0);
 	size = l.size();
@@ -100,7 +123,7 @@ int main(){
 	vector<string> res1 = oneOne(numVertices2,numVertices1);
 	// for(int i=0;i<res1.size();i++) cout<<res1[i]<<"\n";
 	// cout<<"Hey2\n";
-	vector<string> res2 = myConstraint(gEmail,gPhone);
+	vector<string> res2 = myConstraint(gEmail,gPhone, arr1, arr2);
   int numVariables = (numVertices2*numVertices1)+(numVertices1*numVertices1)+(numVertices2*numVertices2);
   int numConstraints = res1.size() + res2.size();
 
@@ -108,7 +131,7 @@ int main(){
 	outFile1 << numVertices2 << " " << numVertices1 << "\n";
 	outFile1.close();
 
-    ofstream outFile("./../test.satinput");
+    ofstream outFile(input_file+".satInput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
     for(int i=0;i<res1.size();i++){
     	outFile<<res1[i]<<" 0\n";
@@ -158,7 +181,7 @@ vector<string> oneOne(int n, int m){
 	return res;
 }
 
-vector<string> myConstraint(Graph gEmail, Graph gPhone){
+vector<string> myConstraint(Graph gEmail, Graph gPhone, bool** arr1, bool** arr2){
 	vector<string> res;
 	int n = gEmail.numVertices; int m = gPhone.numVertices;
 	for (int i = 0; i < n; i++){
@@ -170,7 +193,7 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone){
 		// 	nxtNeighbour = temp[temp1];
 		// }
 		for (int j=0; j<n; j++){
-			if (!gEmail.isEdge(i,j)){
+			if (!arr2[i][j]){
 				res.push_back(to_string(-((n*m)+(i*n)+j+1)));
 			}else{
 				res.push_back(to_string((n*m)+(i*n)+j+1));
@@ -189,7 +212,7 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone){
 		// 	nxtNeighbour = temp[temp1];
 		// }
 		for (int j=0; j<m; j++){
-			if (!gPhone.isEdge(i,j)){
+			if (!arr1[i][j]){
 				res.push_back(to_string(-((n*n)+(n*m)+(i*m)+j+1)));
 			}else{
 				res.push_back(to_string((n*n)+(n*m)+(i*m)+j+1));
@@ -206,8 +229,10 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone){
 		for (int j=0; j<n; j++){
 			for (int iDash=0; iDash<m; iDash++){
 				for (int jDash=0; jDash<m; jDash++){
-					res.push_back(to_string(-((n*m)+(i*n)+j+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
-					res.push_back(to_string(-((n*n)+(n*m)+(iDash*m)+jDash+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
+					if (arr2[i][j]){
+						res.push_back(to_string(-((n*m)+(i*n)+j+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
+						res.push_back(to_string(-((n*n)+(n*m)+(iDash*m)+jDash+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
+					}
 				}
 			}
 		}
@@ -218,14 +243,14 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone){
 vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 	vector<string> res;
 	int n = gEmail.numVertices; int m = gPhone.numVertices;
-	vector<pair<int,int>> eList = gEmail.edgeList();
-	vector<pair<int,int>> pList = gPhone.edgeList();
+	vector<pair<int,int> > eList = gEmail.edgeList();
+	vector<pair<int,int> > pList = gPhone.edgeList();
 	cout<<eList.size()<<"----------------------\n";
 	for(int i=0;i<eList.size();i++) cout<<eList[i].first<<" "<<eList[i].second<<" \n";
 	cout<<pList.size()<<"----------------------\n";
 	for(int i=0;i<eList.size();i++){
 		int v1 = eList[i].first; int v2 = eList[i].second;
-		vector<pair<int,int>> temp;
+		vector<pair<int,int> > temp;
 		for(int j=0;j<pList.size();j++){
 			int v1Dash = pList[j].first; int v2Dash = pList[j].second;
 			pair<int,int> andClause;
@@ -249,8 +274,8 @@ vector<string> edgeConstraint(Graph gEmail,Graph gPhone){
 vector<string> edgeConstraint1(Graph gEmail,Graph gPhone){
 	vector<string> res;
 	int n = gEmail.numVertices; int m = gPhone.numVertices;
-	vector<pair<int,int>> eList = gEmail.edgeList();
-	vector<pair<int,int>> pList = gPhone.edgeList();
+	vector<pair<int,int> > eList = gEmail.edgeList();
+	vector<pair<int,int> > pList = gPhone.edgeList();
 	cout<<eList.size()<<"----------------------\n";
 	for(int i=0;i<eList.size();i++) cout<<eList[i].first<<" "<<eList[i].second<<" \n";
 	cout<<pList.size()<<"----------------------\n";
@@ -275,7 +300,7 @@ vector<string> edgeConstraint1(Graph gEmail,Graph gPhone){
 	return res;
 }
 
-vector<string> getCnf(vector<pair<int,int>> clause){
+vector<string> getCnf(vector<pair<int,int> > clause){
 	cout<<"getCnf "<<clause.size()<<"\n";
 	vector<string> res;
 	if(clause.size()==1){

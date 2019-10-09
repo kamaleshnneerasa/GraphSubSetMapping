@@ -3,15 +3,17 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
   /* code */
-  ifstream inFile("./values.txt");
+  ifstream inFile("values.txt");
   int n, m;
+  string output_file;
+  output_file = argv[1];
   if (inFile.is_open()){
     inFile >> n; inFile >> m;
     inFile.close();
-    ifstream satoutput("./../test.satoutput");
-    ofstream output("./../output.txt");
+    ifstream satoutput(output_file+".satOutput");
+    ofstream output(output_file+".mapping");
     string sat;
     getline(satoutput, sat);
     if (sat.compare("SAT") == 0){
