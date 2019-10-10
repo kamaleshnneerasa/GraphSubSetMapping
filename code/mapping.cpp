@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   if (inFile.is_open()){
     inFile >> n; inFile >> m;
     inFile.close();
-    ifstream satoutput(output_file+".satOutput");
+    ifstream satoutput(output_file+".satoutput");
     ofstream output(output_file+".mapping");
     string sat;
     getline(satoutput, sat);
@@ -31,6 +31,8 @@ int main(int argc, char** argv) {
   }
     satoutput.close();
     output.close();
+  }else{
+    cout << "values.txt doesnot exist\n";
   }
   return 0;
 }

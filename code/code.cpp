@@ -131,7 +131,7 @@ int main(int argc, char** argv){
 	outFile1 << numVertices2 << " " << numVertices1 << "\n";
 	outFile1.close();
 
-    ofstream outFile(input_file+".satInput");
+    ofstream outFile(input_file+".satinput");
     outFile<<"p"<<" cnf "<<numVariables<<" "<<numConstraints<<"\n";
     for(int i=0;i<res1.size();i++){
     	outFile<<res1[i]<<" 0\n";
@@ -230,8 +230,12 @@ vector<string> myConstraint(Graph gEmail, Graph gPhone, bool** arr1, bool** arr2
 			for (int iDash=0; iDash<m; iDash++){
 				for (int jDash=0; jDash<m; jDash++){
 					if (arr2[i][j]){
-						res.push_back(to_string(-((n*m)+(i*n)+j+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
-						res.push_back(to_string(-((n*n)+(n*m)+(iDash*m)+jDash+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
+						res.push_back(to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
+						// res.push_back(to_string(-((n*n)+(n*m)+(iDash*m)+jDash+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
+					}
+					if (arr1[iDash][jDash]){
+						// res.push_back(to_string(-((n*m)+(i*n)+j+1)) + " " + to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*n)+(n*m)+(iDash*m)+jDash+1));
+						res.push_back(to_string(-((i*m)+iDash+1)) + " " + to_string(-((j*m)+jDash+1)) + " " + to_string((n*m)+(i*n)+j+1));
 					}
 				}
 			}
